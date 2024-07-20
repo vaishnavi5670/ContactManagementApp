@@ -1,0 +1,103 @@
+﻿@model IEnumerable<ContactApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#createContactModal">
+                    <i class="fa fa-plus"></i> Add New
+                </button>
+            </p>
+
+            <form asp-controller="Contacts" asp-action="Index" method="get">
+                <div class="input-group" style="width: 70%;">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Search Email ID" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                    <td>
+                                        <form asp-action="ToggleFavorite" asp-route-id="@item.Id" method="post" style="display: block;">
+                                            <button type="submit" class="btn btn-link">
+                                                <i class="fa @((item.IsFavorite) ? "fa-star text-warning" : "fa-star-o")"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.Id">
+                                            <i class="fa fa-edit"></i>
+                                        </a> |
+                                        <a asp-action="Delete" asp-route-id="@item.Id">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h2>Favorites</h2>
+            <ul class="list-group">
+                @foreach (var item in Model.Where(c => c.IsFavorite))
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @item.Name
+                        <form asp-action="ToggleFavorite" asp-route-id="@item.Id" method="post" style="display: block;">
+                            <button type="submit" class="btn btn-link">
+                                <i class="fa fa-star text-warning"></i>
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="createContactModal" tabindex="-1" role="dialog" aria-labelledby="createContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createContactModalLabel">Create New Contact</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Html.Partial("Create", new ContactApp.Models.Contact())
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
